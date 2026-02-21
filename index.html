@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title id="pageTitle">🎉 Πάρτι Γενεθλίων – Ελένη &amp; Γιώργος</title>
+<style>
+/* ============================================================
+   RESET & VARIABLES
+   ============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --pink:#ff6b9d;--blue:#4fc3f7;--gold:#ffd700;--purple:#b388ff;
+  --green:#69f0ae;--red:#ff5252;--orange:#ffab40;
+  --text-light:#fff;--text-dark:#1a1a2e;
+  --ground-h:18vh;
+  --full-h:100vh;
+}
+@supports(height:100dvh){
+  :root{--ground-h:18dvh;--full-h:100dvh}
+}
+
+/* ============================================================
+   BODY – no scrolling, position controlled by buttons
+   ============================================================ */
+html{overflow:hidden;height:100%}
+body{
+  height:100%;
+  margin:0;overflow:hidden;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:#0d0d2b;color:var(--text-light);
+  cursor:default;
+}
+
+/* ============================================================
+   FIXED VIEWPORT ("camera")
+   ============================================================ */
+#camera{
+  position:fixed;top:0;left:0;
+  width:100vw;height:var(--full-h,100vh);
+  overflow:hidden;z-index:1;
+}
+
+/* ============================================================
+   WORLD – wide horizontal strip, translated by JS
+   ============================================================ */
+#world{
+  position:absolute;top:0;left:0;
+  width:8400px;height:var(--full-h,100vh);
+  will-change:transform;
+}
+
+/* ============================================================
+   SKY
+   ============================================================ */
+.sky{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  background:linear-gradient(180deg,#0b0b2a 0%,#1a1a4e 30%,#2e1065 60%,#4a1a8a 100%);
+  transition:background 1s ease;
+}
+
+/* STARS */
+.stars-layer{
+  position:absolute;top:0;left:0;
+  width:100%;height:60%;
+  will-change:transform;
+}
+.star{
+  position:absolute;background:#fff;border-radius:50%;
+  animation:twinkle 3s ease-in-out infinite alternate;
+}
+@keyframes twinkle{0%{opacity:.15}100%{opacity:1}}
+
+/* CLOUDS */
+.clouds-layer{
+  position:absolute;top:0;left:0;width:100%;height:60%;z-index:1;
+  will-change:transform;
+}
+.cloud{
+  position:absolute;
+  background:rgba(255,255,255,.08);
+  border-radius:50px;
+}
+.cloud::before,.cloud::after{
+  content:'';position:absolute;
+  background:inherit;border-radius:50%;
+}
+.cloud::before{width:60%;height:130%;top:-40%;left:20%}
+.cloud::after{width:40%;height:100%;top:-20%;right:15%}
+
+/* HILLS */
+.hills-layer{
+  position:absolute;bottom:var(--ground-h,18vh);left:0;
+  width:100%;height:30vh;
+  will-change:transform;
+}
+.hill{
+  position:absolute;bottom:0;
+  border-radius:50% 50% 0 0;
+  opacity:.25;
+}
+
+/* ============================================================
+   GROUND
+   ============================================================ */
+.ground{
+  position:absolute;bottom:0;left:0;
+  width:100%;height:var(--ground-h,18vh);
+}
+.ground-grass{
+  position:absolute;top:0;left:0;
+  width:100%;height:12px;
+  background:repeating-linear-gradient(90deg,#6abf40 0px,#5aa832 40px,#6abf40 80px);
+  z-index:2;
+}
+.ground-dirt{
+  position:absolute;top:12px;left:0;
+  width:100%;height:calc(100% - 12px);
+  background:repeating-linear-gradient(0deg,#8B6914 0px,#8B6914 20px,#7a5c10 20px,#7a5c10 40px);
+}
+.tuft{
+  position:absolute;top:-8px;
+  width:0;height:0;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+  border-bottom:10px solid #6abf40;
+  z-index:3;
+}
+
+/* ============================================================
+   TREES
+   ============================================================ */
+.tree{position:absolute;bottom:var(--ground-h,18vh);z-index:4}
+.tree-trunk{
+  width:16px;height:40px;
+  background:linear-gradient(90deg,#6b4423,#8B5E3C,#6b4423);
+  margin:0 auto;border-radius:2px;
+}
+.tree-top{
+  width:0;height:0;
+  border-left:30px solid transparent;
+  border-right:30px solid transparent;
+  border-bottom:45px solid #2d8a4e;
+  position:relative;
+}
+.tree-top::after{
+  content:'';position:absolute;
+  top:18px;left:-24px;
+  width:0;height:0;
+  border-left:24px solid transparent;
+  border-right:24px solid transparent;
+  border-bottom:38px solid #3aa55d;
+}
+
+/* ============================================================
+   CASTLES
+   ============================================================ */
+.castle{position:absolute;bottom:var(--ground-h,18vh);z-index:4}
+.castle-body{
+  width:80px;height:70px;
+  background:linear-gradient(135deg,#9b8ec4,#7b6fad);
+  border-radius:4px 4px 0 0;position:relative;
+}
+.castle-tower{
+  position:absolute;top:-40px;
+  width:24px;height:40px;
+  background:linear-gradient(135deg,#b3a4d9,#8b7ec4);
+  border-radius:3px 3px 0 0;
+}
+.castle-tower::before{
+  content:'';position:absolute;top:-12px;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-bottom:12px solid var(--pink);
+}
+.castle-tower.lt{left:4px}
+.castle-tower.rt{right:4px}
+.castle-door{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:20px;height:28px;
+  background:#3a2a5a;border-radius:10px 10px 0 0;
+}
+
+/* ============================================================
+   QUESTION BLOCKS
+   ============================================================ */
+.q-block{
+  position:absolute;bottom:calc(var(--ground-h,18vh) + 80px);
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--gold),#e6b800);
+  border:3px solid #b38600;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:1.2rem;color:#b38600;
+  z-index:5;cursor:pointer;transition:transform .2s;
+}
+.q-block:hover{transform:translateY(-6px)}
+.q-block.hit{animation:blockHit .3s ease-out}
+@keyframes blockHit{
+  0%{transform:translateY(0)}50%{transform:translateY(-15px)}100%{transform:translateY(0)}
+}
+
+/* ============================================================
+   COINS
+   ============================================================ */
+.coin{
+  position:absolute;
+  width:22px;height:22px;
+  background:radial-gradient(circle at 40% 35%,#ffe066,var(--gold),#cc9900);
+  border-radius:50%;border:2px solid #b38600;
+  z-index:5;animation:coinFloat 2s ease-in-out infinite;
+  cursor:pointer;transition:opacity .3s,transform .3s;
+}
+.coin.collected{opacity:0;transform:scale(2) translateY(-30px)!important}
+@keyframes coinFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ============================================================
+   ZONE CONTENT PANELS
+   ============================================================ */
+.zone-panel{
+  position:absolute;z-index:10;
+  background:rgba(20,10,50,.88);
+  backdrop-filter:blur(14px);
+  border:2px solid rgba(255,255,255,.18);
+  border-radius:24px;padding:30px 26px;
+  text-align:center;
+  opacity:0;transform:translateY(30px) scale(.95);
+  transition:opacity .5s,transform .5s;
+  max-width:420px;
+  pointer-events:none;
+}
+.zone-panel.visible{
+  opacity:1;transform:translateY(0) scale(1);
+  pointer-events:auto;
+}
+.zone-title{
+  font-size:clamp(1.5rem,4vw,2.2rem);
+  font-weight:800;margin-bottom:10px;
+  text-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+.zone-sub{
+  font-size:clamp(.95rem,2.5vw,1.15rem);
+  opacity:.9;margin-bottom:16px;line-height:1.5;
+}
+.zone-text{
+  font-size:.9rem;opacity:.75;margin-bottom:12px;line-height:1.6;
+}
+
+/* ============================================================
+   LEVEL SIGNS
+   ============================================================ */
+.level-sign{position:absolute;bottom:var(--ground-h,18vh);z-index:6;text-align:center}
+.level-sign-post{
+  width:8px;height:60px;
+  background:linear-gradient(90deg,#8B6914,#a67c1a,#8B6914);
+  margin:0 auto;
+}
+.level-sign-board{
+  background:linear-gradient(135deg,var(--gold),#e6b800);
+  color:var(--text-dark);padding:6px 16px;
+  border-radius:6px;font-weight:800;font-size:.8rem;
+  letter-spacing:1px;border:2px solid #b38600;
+  white-space:nowrap;
+}
+
+/* ============================================================
+   CHARACTERS (fixed at bottom – CSS pixel art)
+   ============================================================ */
+#characters-container{
+  position:fixed;
+  bottom:var(--ground-h,18vh);left:50%;
+  transform:translateX(-50%);
+  z-index:50;display:flex;gap:10px;
+  pointer-events:none;
+  transition:transform .1s;
+}
+#characters-container.char-jump{
+  animation:charJump .45s cubic-bezier(.3,1.4,.6,1) forwards;
+}
+@keyframes charJump{
+  0%  {transform:translateX(-50%) translateY(0)}
+  40% {transform:translateX(-50%) translateY(-90px)}
+  100%{transform:translateX(-50%) translateY(0)}
+}
+#characters-container.victory-jump{
+  animation:victoryJump 1.6s ease-in-out 3;
+}
+@keyframes victoryJump{
+  0%{transform:translateX(-50%) translateY(0) scale(1)}
+  15%{transform:translateX(-50%) translateY(-50px) scale(1.1)}
+  25%{transform:translateX(-50%) translateY(-60px) scale(1.15) rotate(-5deg)}
+  40%{transform:translateX(-50%) translateY(0) scale(1)}
+  55%{transform:translateX(-50%) translateY(-40px) scale(1.08) rotate(5deg)}
+  70%{transform:translateX(-50%) translateY(0) scale(1)}
+  85%{transform:translateX(-50%) translateY(-20px) scale(1.04)}
+  100%{transform:translateX(-50%) translateY(0) scale(1)}
+}
+
+/* ── PRINCESS ── */
+.princess{width:48px;height:72px;position:relative;animation:charBounce .35s ease-in-out infinite}
+.princess .head{
+  width:22px;height:22px;background:#fdd9b5;border-radius:50%;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2;
+}
+.princess .head::before{
+  content:'';position:absolute;top:9px;left:5px;
+  width:4px;height:4px;background:#2c1810;border-radius:50%;
+  box-shadow:8px 0 0 #2c1810;
+}
+.princess .head::after{
+  content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:6px;height:3px;border-bottom:2px solid #e07a5f;border-radius:0 0 50% 50%;
+}
+.princess .tiara{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3}
+.princess .tiara::before{
+  content:'';display:block;width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;
+  border-bottom:8px solid var(--gold);margin:0 auto;
+}
+.princess .tiara::after{
+  content:'';display:block;width:18px;height:4px;
+  background:var(--gold);border-radius:2px;margin-top:-1px;margin-left:-3px;
+}
+.princess .hair{
+  position:absolute;top:2px;left:50%;transform:translateX(-50%);
+  width:26px;height:16px;background:#f0c060;
+  border-radius:50% 50% 0 0;z-index:1;
+}
+.princess .hair::after{
+  content:'';position:absolute;top:12px;right:-3px;
+  width:8px;height:20px;background:#f0c060;border-radius:0 0 40% 40%;
+}
+.princess .dress{
+  position:absolute;top:22px;left:50%;transform:translateX(-50%);
+  width:24px;height:20px;
+  background:linear-gradient(180deg,var(--pink),#e0558a);
+  border-radius:4px 4px 0 0;z-index:2;
+}
+.princess .skirt{
+  position:absolute;top:38px;left:50%;transform:translateX(-50%);
+  width:0;height:0;
+  border-left:20px solid transparent;border-right:20px solid transparent;
+  border-top:22px solid var(--pink);z-index:1;
+}
+.princess .leg-l{
+  position:absolute;bottom:0;left:12px;
+  width:6px;height:16px;background:#fdd9b5;
+  border-radius:0 0 3px 3px;
+  transform-origin:top center;animation:legSwing .35s ease-in-out infinite;
+}
+.princess .leg-l::after{
+  content:'';position:absolute;bottom:0;left:-1px;
+  width:8px;height:4px;background:var(--pink);border-radius:2px;
+}
+.princess .leg-r{
+  position:absolute;bottom:0;right:12px;
+  width:6px;height:16px;background:#fdd9b5;
+  border-radius:0 0 3px 3px;
+  transform-origin:top center;animation:legSwing .35s ease-in-out infinite reverse;
+}
+.princess .leg-r::after{
+  content:'';position:absolute;bottom:0;left:-1px;
+  width:8px;height:4px;background:var(--pink);border-radius:2px;
+}
+
+/* ── SUPERHERO ── */
+.superhero{width:48px;height:68px;position:relative;animation:charBounce .35s ease-in-out infinite;animation-delay:.1s}
+.superhero .head{
+  width:20px;height:20px;background:#fdd9b5;border-radius:50%;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2;
+}
+.superhero .head::before{
+  content:'';position:absolute;top:8px;left:4px;
+  width:4px;height:4px;background:#2c1810;border-radius:50%;
+  box-shadow:7px 0 0 #2c1810;
+}
+.superhero .head::after{
+  content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:5px;height:2px;border-bottom:2px solid #e07a5f;border-radius:0 0 50% 50%;
+}
+.superhero .mask{
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  width:24px;height:8px;background:var(--blue);border-radius:8px;
+  z-index:3;opacity:.85;
+}
+.superhero .s-hair{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:22px;height:12px;background:#5c3a1e;
+  border-radius:50% 50% 0 0;z-index:1;
+}
+.superhero .s-body{
+  position:absolute;top:20px;left:50%;transform:translateX(-50%);
+  width:22px;height:24px;
+  background:linear-gradient(180deg,var(--blue),#2196f3);
+  border-radius:4px;z-index:2;
+}
+.superhero .s-body::after{
+  content:'';position:absolute;bottom:6px;left:0;
+  width:100%;height:4px;background:var(--gold);
+}
+.superhero .emblem{
+  position:absolute;top:24px;left:50%;transform:translateX(-50%);
+  font-size:10px;z-index:3;line-height:1;
+}
+.superhero .cape{
+  position:absolute;top:20px;right:2px;
+  width:18px;height:30px;
+  background:linear-gradient(180deg,var(--red),#d32f2f);
+  border-radius:0 0 8px 4px;z-index:1;
+  transform-origin:top center;
+  animation:capeFlutter .5s ease-in-out infinite alternate;
+}
+@keyframes capeFlutter{0%{transform:rotate(-5deg) skewX(2deg)}100%{transform:rotate(5deg) skewX(-2deg)}}
+.superhero .leg-l{
+  position:absolute;bottom:0;left:13px;
+  width:6px;height:14px;background:var(--blue);
+  border-radius:0 0 3px 3px;
+  transform-origin:top center;animation:legSwing .35s ease-in-out infinite;
+}
+.superhero .leg-l::after{
+  content:'';position:absolute;bottom:0;left:-1px;
+  width:8px;height:4px;background:var(--red);border-radius:2px;
+}
+.superhero .leg-r{
+  position:absolute;bottom:0;right:13px;
+  width:6px;height:14px;background:var(--blue);
+  border-radius:0 0 3px 3px;
+  transform-origin:top center;animation:legSwing .35s ease-in-out infinite reverse;
+}
+.superhero .leg-r::after{
+  content:'';position:absolute;bottom:0;left:-1px;
+  width:8px;height:4px;background:var(--red);border-radius:2px;
+}
+
+/* CHARACTER ANIMATIONS */
+@keyframes charBounce{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(-6px)}
+}
+@keyframes legSwing{0%{transform:rotate(-25deg)}100%{transform:rotate(25deg)}}
+
+/* IDLE STATE */
+.char-idle .princess,.char-idle .superhero{animation-play-state:paused}
+.char-idle .leg-l,.char-idle .leg-r{animation-play-state:paused;transform:rotate(0)}
+.char-idle .cape{animation:capeIdle 2s ease-in-out infinite alternate}
+@keyframes capeIdle{0%{transform:rotate(-2deg)}100%{transform:rotate(2deg)}}
+
+/* WALK STATE – gentle slower movement */
+.char-walk .princess,.char-walk .superhero{animation-duration:.55s}
+.char-walk .leg-l,.char-walk .leg-r{animation-duration:.55s}
+.char-walk .cape{animation-duration:.8s}
+
+/* RUN STATE – fast energetic movement */
+.char-run .princess,.char-run .superhero{animation-duration:.22s}
+.char-run .leg-l,.char-run .leg-r{animation-duration:.22s}
+.char-run .cape{animation-duration:.3s}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 26px;border:none;border-radius:50px;
+  font-size:1rem;font-weight:700;cursor:pointer;
+  text-decoration:none;color:var(--text-dark);
+  background:var(--gold);
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  min-height:48px;min-width:48px;font-family:inherit;
+  position:relative;overflow:hidden;
+}
+.btn:hover,.btn:focus{
+  transform:translateY(-3px) scale(1.04);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);outline:none;
+}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.btn:active{transform:scale(.97)}
+.btn-pink{background:var(--pink);color:#fff}
+.btn-blue{background:var(--blue);color:var(--text-dark)}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-green{background:var(--green);color:var(--text-dark)}
+.btn-group{
+  display:flex;flex-wrap:wrap;gap:10px;
+  justify-content:center;margin-top:14px;
+}
+
+/* ============================================================
+   CHARACTER CARDS (Level 1)
+   ============================================================ */
+.characters{
+  display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0;
+}
+.character-card{
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(8px);
+  border-radius:18px;padding:18px 16px;
+  width:140px;text-align:center;
+  border:2px solid rgba(255,255,255,.15);
+  transition:transform .4s,box-shadow .4s;
+}
+.character-card:hover{
+  transform:translateY(-8px) rotate(-2deg);
+  box-shadow:0 12px 30px rgba(0,0,0,.3);
+}
+.char-emoji{font-size:2.8rem;display:block;margin-bottom:6px}
+.char-name{font-size:1.1rem;font-weight:800}
+.char-age{font-size:.85rem;opacity:.8;margin-top:2px}
+
+/* ============================================================
+   INFO CARDS
+   ============================================================ */
+.info-card{
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(8px);
+  border:2px solid rgba(255,255,255,.15);
+  border-radius:16px;padding:16px;
+  margin:8px auto;max-width:340px;
+}
+.info-icon{font-size:1.8rem;margin-bottom:4px}
+/* CSS mini-calendar icon showing custom date */
+.mini-cal{
+  display:inline-flex;flex-direction:column;align-items:center;
+  width:42px;border-radius:6px;overflow:hidden;
+  border:2px solid rgba(255,255,255,.25);
+  font-size:1rem;line-height:1;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+  transition:transform .2s;
+}
+.mini-cal:hover{transform:scale(1.1)}
+.mini-cal-hdr{
+  background:#e53935;color:#fff;width:100%;
+  font-size:.5rem;font-weight:800;letter-spacing:1px;
+  padding:2px 0;text-align:center;
+}
+.mini-cal-day{
+  background:#fff;color:#222;width:100%;
+  font-size:1.15rem;font-weight:900;
+  padding:2px 0 3px;text-align:center;
+}
+.info-card[onclick]{transition:transform .2s, box-shadow .2s}
+.info-card[onclick]:hover,.info-card[onclick]:focus{transform:scale(1.03);box-shadow:0 4px 20px rgba(255,215,0,.3);outline:none}
+.info-card[onclick]:active{transform:scale(.97)}
+.info-label{font-size:.7rem;text-transform:uppercase;letter-spacing:2px;opacity:.6;margin-bottom:2px}
+.info-value{font-size:1.15rem;font-weight:700}
+
+/* ============================================================
+   INFO CHIP (αλλεργίες – ΜΟΝΟ στο RSVP)
+   ============================================================ */
+.info-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:30px;padding:8px 18px;
+  font-size:.82rem;margin-top:14px;
+}
+
+/* ============================================================
+   HUD
+   ============================================================ */
+.hud{position:fixed;top:0;left:0;width:100%;z-index:100;pointer-events:none}
+.party-meter{width:100%;height:5px;background:rgba(255,255,255,.08)}
+.party-meter-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--pink),var(--gold),var(--blue),var(--purple));
+  transition:width .3s ease-out;border-radius:0 3px 3px 0;
+}
+.party-label{
+  position:absolute;top:8px;left:12px;
+  font-size:.7rem;color:rgba(255,255,255,.6);font-weight:700;
+}
+.coin-counter{
+  position:absolute;top:8px;right:60px;
+  font-size:.8rem;color:var(--gold);font-weight:700;
+}
+
+/* ============================================================
+   CONTRAST TOGGLE
+   ============================================================ */
+.contrast-btn{
+  position:fixed;top:8px;right:10px;z-index:200;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  color:#fff;padding:6px 12px;border-radius:20px;
+  cursor:pointer;font-size:.75rem;backdrop-filter:blur(6px);
+  transition:background .3s;
+}
+.contrast-btn:hover,.contrast-btn:focus{background:rgba(255,255,255,.3)}
+body.high-contrast .sky{background:#000!important}
+body.high-contrast .zone-panel{background:rgba(0,0,0,.95);border-color:#fff}
+
+/* ============================================================
+   TOAST / CONFETTI
+   ============================================================ */
+
+.toast{
+  position:fixed;bottom:20px;left:50%;z-index:9999;
+  transform:translateX(-50%) translateY(80px);
+  background:#222;color:#fff;padding:12px 24px;
+  border-radius:12px;font-weight:600;font-size:.9rem;
+  transition:transform .4s ease;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.confetti-box{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:9998;overflow:hidden;
+}
+.confetti-p{
+  position:absolute;top:-20px;opacity:0;
+  animation:confFall linear forwards;
+}
+@keyframes confFall{
+  0%{opacity:1;transform:translateY(0) rotate(0)}
+  100%{opacity:0;transform:translateY(110vh) rotate(720deg)}
+}
+
+/* ============================================================
+   COIN BURST (click sparkle)
+   ============================================================ */
+.coin-burst{
+  position:fixed;pointer-events:none;z-index:9996;
+  font-size:1.4rem;animation:coinPop .7s ease-out forwards;
+}
+@keyframes coinPop{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-60px) scale(1.4)}
+}
+
+/* ============================================================
+   UNICORN FLY-ACROSS & TOOL FALL (Hero card taps)
+   ============================================================ */
+.fx-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:9997;overflow:hidden;
+}
+.unicorn-fly{
+  position:absolute;font-size:2.4rem;opacity:0;
+  animation:unicornAcross linear forwards;
+  filter:drop-shadow(0 0 6px rgba(255,105,180,.6));
+}
+@keyframes unicornAcross{
+  0%  {opacity:0;transform:translateX(0) translateY(0) scaleX(1) rotate(0deg)}
+  5%  {opacity:1}
+  50% {transform:translateX(50vw) translateY(-40px) scaleX(1) rotate(-5deg)}
+  95% {opacity:1}
+  100%{opacity:0;transform:translateX(110vw) translateY(10px) scaleX(1) rotate(5deg)}
+}
+.unicorn-fly.from-right{
+  animation-name:unicornAcrossR;
+}
+@keyframes unicornAcrossR{
+  0%  {opacity:0;transform:translateX(0) translateY(0) scaleX(-1) rotate(0deg)}
+  5%  {opacity:1}
+  50% {transform:translateX(-50vw) translateY(-40px) scaleX(-1) rotate(5deg)}
+  95% {opacity:1}
+  100%{opacity:0;transform:translateX(-110vw) translateY(10px) scaleX(-1) rotate(-5deg)}
+}
+.tool-fall{
+  position:absolute;font-size:2rem;opacity:0;
+  animation:toolDrop ease-in forwards;
+}
+@keyframes toolDrop{
+  0%  {opacity:0;transform:translateY(0) rotate(0deg)}
+  8%  {opacity:1}
+  60% {opacity:1}
+  100%{opacity:0;transform:translateY(110vh) rotate(540deg)}
+}
+
+/* ============================================================
+   TARDIS EASTER EGG
+   ============================================================ */
+.tardis-wrap{
+  position:fixed;z-index:9999;pointer-events:none;
+  bottom:45%;right:-200px;
+  animation:tardisFly 4s cubic-bezier(.25,.1,.25,1) forwards;
+}
+@keyframes tardisFly{
+  0%  {transform:translate(0,0) scale(1.2) rotate(2deg);opacity:0}
+  4%  {opacity:1}
+  15% {transform:translate(-25vw,-10vh) scale(1.3) rotate(-3deg)}
+  40% {transform:translate(-50vw,8vh) scale(1.1) rotate(2deg)}
+  65% {transform:translate(-75vw,-15vh) scale(1.25) rotate(-2deg)}
+  90% {opacity:1}
+  100%{transform:translate(-120vw,-5vh) scale(1) rotate(0deg);opacity:0}
+}
+.tardis{
+  width:70px;height:120px;position:relative;
+  filter:drop-shadow(0 0 18px rgba(0,140,255,.8))
+         drop-shadow(0 0 40px rgba(0,140,255,.45));
+}
+/* Lamp */
+.tardis-lamp{
+  width:8px;height:8px;margin:0 auto 0;
+  background:radial-gradient(circle,#fff,#6af);
+  border-radius:50%;
+  box-shadow:0 0 10px 4px rgba(100,170,255,.8);
+  animation:tardisLamp .6s ease-in-out infinite alternate;
+}
+@keyframes tardisLamp{0%{box-shadow:0 0 6px 2px rgba(100,170,255,.5)}100%{box-shadow:0 0 14px 6px rgba(100,170,255,1)}}
+/* Top cap */
+.tardis-cap{
+  width:44px;height:6px;margin:0 auto;
+  background:linear-gradient(180deg,#1a3a6e,#0e2a52);
+  border-radius:2px 2px 0 0;
+}
+/* Body */
+.tardis-body{
+  width:52px;height:70px;margin:0 auto;
+  background:linear-gradient(135deg,#0e3a7a,#15478a,#0e3268);
+  border:2px solid #0a2a55;
+  position:relative;
+  display:flex;flex-wrap:wrap;justify-content:center;
+  padding:4px 2px 2px;
+  gap:1px;
+}
+/* Windows (4 panes) */
+.tardis-win{
+  width:20px;height:16px;
+  background:linear-gradient(135deg,rgba(180,220,255,.85),rgba(120,180,255,.65));
+  border:1px solid #0a2a55;
+}
+/* Sign */
+.tardis-sign{
+  width:46px;height:7px;margin:1px auto;
+  background:#111;
+  border:1px solid #0a2a55;
+  position:relative;overflow:hidden;
+}
+.tardis-sign::after{
+  content:'POLICE BOX';
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:3.5px;font-weight:700;letter-spacing:.3px;
+  color:#fff;font-family:Arial,sans-serif;
+}
+/* Door panels */
+.tardis-doors{
+  display:flex;gap:1px;margin-top:1px;
+}
+.tardis-door{
+  width:22px;height:30px;
+  background:linear-gradient(180deg,#0d3570,#0b2d60);
+  border:1px solid #0a2a55;
+  display:flex;flex-direction:column;align-items:center;
+  padding-top:2px;gap:2px;
+}
+.tardis-door-panel{
+  width:16px;height:8px;
+  background:linear-gradient(135deg,#0f3d80,#133f78);
+  border:1px solid #0a2a55;
+}
+/* Base */
+.tardis-base{
+  width:56px;height:5px;margin:0 auto;
+  background:linear-gradient(180deg,#0a2a55,#071d3a);
+  border-radius:0 0 2px 2px;
+}
+
+/* ============================================================
+   FLYING SUPERHERO GUIDE (Time Quest)
+   ============================================================ */
+#flyHero{
+  position:absolute;left:3380px;bottom:calc(var(--ground-h,18vh) + 280px);
+  z-index:55;pointer-events:none;opacity:0;
+  transform:translateX(500px) translateY(-60px) scale(.5);
+  transition:transform 1.2s cubic-bezier(.22,.9,.36,1),
+             opacity .6s ease;
+}
+#flyHero.hero-in{
+  transform:translateX(0) translateY(0) scale(1);
+  opacity:1;pointer-events:auto;
+}
+#flyHero.hero-out{
+  animation:heroFlyAway 1.4s ease-in forwards;
+}
+@keyframes heroFlyAway{
+  0%{transform:translateX(0) translateY(0) scale(1) rotate(0deg);opacity:1}
+  15%{transform:translateX(-10px) translateY(8px) scale(1.05) rotate(5deg);opacity:1}
+  40%{transform:translateX(150px) translateY(-60px) scale(.9) rotate(-15deg);opacity:.9}
+  70%{transform:translateX(400px) translateY(-200px) scale(.5) rotate(360deg);opacity:.4}
+  100%{transform:translateX(700px) translateY(-350px) scale(.2) rotate(720deg);opacity:0}
+}
+
+/* ============================================================
+   FLYING GIRL SUPERHERO (RSVP Quest – zone4)
+   ============================================================ */
+#flyGirl{
+  position:absolute;z-index:55;pointer-events:none;
+  opacity:0;width:0;height:0;
+}
+
+/* Girl sprite – centered on #flyGirl origin, transformed by JS */
+.girl-sprite{
+  position:absolute;left:0;top:0;
+  width:34px;height:50px;
+  margin-left:-17px;margin-top:-25px;
+  will-change:transform;
+}
+/* Sparkle trail */
+.girl-sprite::after{
+  content:'✨';position:absolute;bottom:-2px;left:50%;
+  transform:translateX(-50%);font-size:.55rem;
+  animation:sparkleTrail 1s ease-in-out infinite;
+  opacity:.8;
+}
+@keyframes sparkleTrail{
+  0%{opacity:.8;transform:translateX(-50%) scale(1)}
+  50%{opacity:.3;transform:translateX(-50%) scale(1.4)}
+  100%{opacity:.8;transform:translateX(-50%) scale(1)}
+}
+@media(max-width:768px){
+  .girl-sprite{width:26px;height:38px;margin-left:-13px;margin-top:-19px}
+}
+@media(max-width:400px){
+  .girl-sprite{width:22px;height:32px;margin-left:-11px;margin-top:-16px}
+}
+
+/* Girl body parts */
+.gs-cape{
+  position:absolute;top:14px;left:1px;
+  width:26px;height:32px;
+  background:linear-gradient(180deg,#f48fb1,#e91e63);
+  border-radius:3px 3px 14px 16px;z-index:0;
+  animation:capeWave 1.5s ease-in-out infinite;
+  transform-origin:top right;
+}
+.gs-head{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:16px;height:16px;background:#ffcc80;border-radius:50%;z-index:2;
+}
+.gs-head::after{
+  content:'';position:absolute;top:-4px;left:-2px;
+  width:20px;height:12px;background:#5d4037;
+  border-radius:10px 10px 0 0;z-index:3;
+}
+.gs-mask{
+  position:absolute;top:4px;left:50%;transform:translateX(-50%);
+  width:18px;height:7px;background:#e91e63;border-radius:6px;z-index:4;
+}
+.gs-mask::before,.gs-mask::after{
+  content:'';position:absolute;top:1px;width:4px;height:4px;
+  background:#fff;border-radius:50%;
+}
+.gs-mask::before{left:2px}
+.gs-mask::after{right:2px}
+.gs-torso{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:14px;height:18px;background:#e91e63;border-radius:4px;z-index:1;
+}
+.gs-emblem{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  font-size:.5rem;z-index:2;
+}
+.gs-skirt{
+  position:absolute;top:28px;left:50%;transform:translateX(-50%);
+  width:20px;height:8px;
+  background:linear-gradient(180deg,#e91e63,#f48fb1);
+  border-radius:0 0 10px 10px;z-index:1;
+}
+.gs-legs{
+  position:absolute;top:34px;left:50%;transform:translateX(-50%);
+  display:flex;gap:3px;
+}
+.gs-leg{
+  width:5px;height:14px;background:#f48fb1;border-radius:0 0 2px 2px;
+}
+.gs-arm{
+  position:absolute;top:16px;z-index:2;
+  width:12px;height:4px;background:#e91e63;border-radius:2px;
+}
+.gs-arm.left{left:-6px;transform:rotate(20deg)}
+.gs-arm.right{right:-6px;transform:rotate(-20deg)}
+.gs-arm::after{
+  content:'';position:absolute;top:-1px;
+  width:5px;height:5px;background:#ffcc80;border-radius:50%;
+}
+.gs-arm.left::after{left:-4px}
+.gs-arm.right::after{right:-4px}
+
+/* Pink circle that draws around the date */
+.rsvp-date-wrap{
+  position:relative;display:inline-block;
+  transition:text-shadow .5s ease;
+}
+.rsvp-date-wrap.glow{
+  text-shadow:0 0 12px #ff4081,0 0 24px rgba(255,64,129,.4);
+}
+.pink-circle-svg{
+  position:absolute;
+  top:50%;left:50%;
+  pointer-events:none;z-index:1;
+  overflow:visible;
+}
+.pink-circle-svg ellipse{
+  fill:none;stroke:#ff4081;stroke-width:3;
+  stroke-linecap:round;
+}
+/* stroke-dashoffset driven by JS – no CSS animations needed */
+
+/* Hero wrapper bobs while hovering */
+.fly-hero-body{
+  position:relative;width:60px;height:90px;
+  animation:heroFloat 2s ease-in-out infinite;
+}
+@keyframes heroFloat{
+  0%,100%{transform:translateY(0) rotate(-3deg)}
+  50%{transform:translateY(-10px) rotate(2deg)}
+}
+
+/* Cape - flows to the LEFT (hero faces right/forward) */
+.fh-cape{
+  position:absolute;top:22px;left:2px;
+  width:40px;height:50px;background:linear-gradient(180deg,#e53935,#b71c1c);
+  border-radius:4px 4px 20px 24px;z-index:0;
+  animation:capeWave 1.5s ease-in-out infinite;
+  transform-origin:top right;
+}
+@keyframes capeWave{
+  0%,100%{transform:skewX(2deg) scaleY(1)}
+  50%{transform:skewX(-3deg) scaleY(1.06)}
+}
+
+/* Head */
+.fh-head{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:24px;height:24px;background:#ffcc80;border-radius:50%;z-index:2;
+}
+/* Mask */
+.fh-mask{
+  position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  width:28px;height:10px;background:#1565c0;border-radius:8px;
+  z-index:3;
+}
+.fh-mask::before,.fh-mask::after{
+  content:'';position:absolute;top:2px;width:6px;height:5px;
+  background:#fff;border-radius:50%;
+}
+.fh-mask::before{left:3px}
+.fh-mask::after{right:3px}
+
+/* Torso */
+.fh-torso{
+  position:absolute;top:22px;left:50%;transform:translateX(-50%);
+  width:22px;height:28px;background:#1565c0;border-radius:6px;z-index:1;
+}
+/* Lightning emblem */
+.fh-emblem{
+  position:absolute;top:26px;left:50%;transform:translateX(-50%);
+  font-size:.7rem;z-index:2;
+}
+
+/* Tip arm – raised upward like giving advice */
+.fh-arm-point{
+  position:absolute;top:24px;left:8px;z-index:2;
+  width:5px;height:0;background:#1565c0;border-radius:3px;
+  transition:height .5s ease .3s;
+  transform-origin:bottom center;
+}
+.fh-hand{
+  position:absolute;top:-16px;left:-6px;
+  font-size:.9rem;opacity:0;transition:opacity .3s ease .7s;
+  animation:handTip 1.2s ease-in-out infinite;
+}
+@keyframes handTip{
+  0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-3px) rotate(8deg)}
+}
+#flyHero.hero-in .fh-arm-point{
+  height:18px;
+}
+#flyHero.hero-in .fh-hand{
+  opacity:1;
+}
+
+/* Other arm (fist forward/right) */
+.fh-arm-up{
+  position:absolute;top:24px;right:-14px;z-index:2;
+  width:16px;height:5px;background:#1565c0;border-radius:3px;
+  transform:rotate(-20deg);
+}
+.fh-arm-up::after{
+  content:'';position:absolute;right:-5px;top:-2px;
+  width:7px;height:7px;background:#ffcc80;border-radius:50%;
+}
+/* Wave goodbye when flying away */
+#flyHero.hero-out .fh-arm-up{
+  animation:armWave .25s ease-in-out 5;
+}
+@keyframes armWave{
+  0%,100%{transform:rotate(-20deg)}50%{transform:rotate(-45deg)}
+}
+
+/* Legs */
+.fh-legs{
+  position:absolute;top:48px;left:50%;transform:translateX(-50%);
+  display:flex;gap:4px;
+}
+.fh-leg{
+  width:7px;height:22px;background:#c62828;border-radius:0 0 3px 3px;
+}
+.fh-leg::after{
+  content:'';display:block;margin-top:16px;
+  width:9px;height:6px;background:#1565c0;border-radius:0 0 3px 3px;
+}
+
+/* Speech bubble - on the RIGHT side of hero, arrow points left to hero */
+.fh-speech{
+  position:absolute;top:0;left:70px;
+  background:#fff;color:#333;font-size:.72rem;font-weight:700;
+  padding:10px 14px;border-radius:16px;
+  box-shadow:0 4px 16px rgba(0,0,0,.22);
+  white-space:nowrap;pointer-events:none;
+  opacity:0;transform:scale(.5) translateX(-20px);
+  transition:opacity .4s ease .9s, transform .5s ease .9s;
+  cursor:pointer;line-height:1.4;
+}
+.fh-speech::after{
+  content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);
+  border:8px solid transparent;border-right-color:#fff;
+}
+#flyHero.hero-in .fh-speech{
+  opacity:1;transform:scale(1) translateX(0);pointer-events:auto;
+}
+
+@media(max-width:768px){
+  #flyHero{left:3280px;bottom:calc(var(--ground-h,18vh) + 230px);z-index:210}
+  #flyHero.hero-in{transform:translateX(0) translateY(0) scale(.75)}
+  .fh-speech{font-size:.58rem;padding:6px 10px;left:55px;top:0;
+    white-space:normal;max-width:48vw}
+}
+
+/* ============================================================
+   START SCREEN OVERLAY (Level 0)
+   ============================================================ */
+#startScreen{
+  position:fixed;top:0;left:0;width:100%;height:100%;z-index:500;
+  background:linear-gradient(135deg,#1a0a3e 0%,#2d1060 40%,#4a1a8a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;transition:opacity .6s,transform .6s;
+}
+#startScreen.hidden{opacity:0;transform:scale(1.1);pointer-events:none}
+#startScreen h1{
+  font-size:clamp(2rem,7vw,3.8rem);font-weight:900;
+  text-shadow:0 4px 20px rgba(0,0,0,.5);margin-bottom:6px;
+}
+#startScreen .sub{
+  font-size:clamp(.95rem,3vw,1.3rem);opacity:.85;margin-bottom:20px;
+}
+.start-chars{display:flex;gap:30px;margin-bottom:16px;font-size:3.5rem}
+.start-chars span{animation:startBounce 1s ease-in-out infinite alternate}
+.start-chars span:nth-child(2){animation-delay:.3s}
+@keyframes startBounce{0%{transform:translateY(0)}100%{transform:translateY(-15px)}}
+
+/* ============================================================
+   INSTRUCTIONS PANEL (on start screen)
+   ============================================================ */
+.instructions{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:16px;padding:14px 22px;
+  margin:0 auto 18px;text-align:left;
+  max-width:320px;
+}
+.instr-title{
+  font-size:.95rem;font-weight:700;
+  margin-bottom:10px;text-align:center;
+}
+.instr-row{
+  display:flex;align-items:center;gap:10px;
+  font-size:.85rem;margin:6px 0;opacity:.85;
+}
+.instr-icon{font-size:1.1rem;min-width:28px;text-align:center}
+
+/* ============================================================
+   MOVEMENT CONTROLS (on-screen arrows)
+   ============================================================ */
+#moveControls{
+  position:fixed;bottom:3vh;left:0;width:100%;
+  display:flex;justify-content:space-between;
+  padding:0 20px;z-index:60;pointer-events:none;
+  opacity:0;transition:opacity .5s;
+}
+#moveControls.active{opacity:1}
+.move-btn{
+  pointer-events:auto;
+  width:68px;height:68px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(4px);
+  color:#fff;font-size:1.6rem;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;user-select:none;-webkit-user-select:none;
+  touch-action:none;
+  transition:transform .1s,background .15s,border-color .15s;
+}
+.move-btn:active,.move-btn.pressed{
+  background:rgba(255,255,255,.28);
+  border-color:rgba(255,255,255,.5);
+  transform:scale(.9);
+}
+
+/* ============================================================
+   WORLD DECORATIONS
+   ============================================================ */
+.world-deco{
+  position:absolute;z-index:3;font-size:1.8rem;
+  animation:decoFloat 4s ease-in-out infinite;pointer-events:none;
+}
+@keyframes decoFloat{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-10px) rotate(5deg)}
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+/* ── Mobile ≤ 768px ── */
+@media(max-width:768px){
+  .zone-panel{
+    padding:18px 14px;max-width:88vw;
+    border-radius:18px;
+    max-height:72vh;overflow-y:auto;
+    z-index:200;
+  }
+  #zone4{overflow:visible}
+  .zone-title{font-size:1.25rem}
+  .zone-sub{font-size:.88rem}
+  .zone-text{font-size:.82rem}
+  .btn{padding:12px 20px;font-size:.9rem;min-height:52px}
+  .btn-group{gap:8px;flex-direction:column;align-items:center}
+  .btn-group .btn{width:100%;max-width:260px;justify-content:center}
+  .character-card{width:110px;padding:14px 10px}
+  .char-emoji{font-size:2.2rem}
+  .info-card{padding:14px}
+  .info-value{font-size:1.05rem}
+  #characters-container{gap:4px}
+  .princess{transform:scale(.7);transform-origin:bottom center}
+  .superhero{transform:scale(.7);transform-origin:bottom center}
+  .level-sign{display:none}
+  .q-block{width:32px;height:32px;font-size:1rem;bottom:calc(var(--ground-h,16vh) + 100px)}
+  .coin{width:18px;height:18px}
+  .tree{transform:scale(.7);transform-origin:bottom center}
+  .castle{transform:scale(.65);transform-origin:bottom center}
+  .contrast-btn{padding:5px 10px;font-size:.7rem}
+  .party-label{font-size:.65rem}
+  .coin-counter{font-size:.7rem;right:50px}
+  .info-chip{font-size:.78rem;padding:7px 14px}
+  .start-chars{font-size:2.8rem;gap:20px}
+  #startScreen h1{font-size:clamp(1.6rem,8vw,2.8rem)}
+  .move-btn{width:58px;height:58px;font-size:1.3rem}
+  #moveControls{bottom:1.5vh;padding:0 12px}
+  .instructions{max-width:85vw;padding:12px 16px}
+  .instr-row{font-size:.8rem}
+}
+/* ── Small phones ≤ 400px ── */
+@media(max-width:400px){
+  .zone-panel{padding:16px 12px;max-width:92vw}
+  .zone-title{font-size:1.1rem}
+  .btn{padding:11px 16px;font-size:.85rem}
+  .character-card{width:95px;padding:10px 8px}
+  .char-emoji{font-size:1.8rem}
+  .char-name{font-size:.95rem}
+  .princess{transform:scale(.6);transform-origin:bottom center}
+  .superhero{transform:scale(.6);transform-origin:bottom center}
+  .move-btn{width:50px;height:50px;font-size:1.1rem}
+  .instructions{padding:10px 14px}
+  .instr-row{font-size:.75rem;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ HUD ═══════ -->
+<div class="hud" aria-hidden="true">
+  <div class="party-meter" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Party Meter">
+    <div class="party-meter-fill" id="meterFill"></div>
+  </div>
+  <div class="party-label" id="meterLabel">🎉 0%</div>
+  <div class="coin-counter" id="coinCounter">🪙 0</div>
+</div>
+
+<button class="contrast-btn" aria-label="Εναλλαγή αντίθεσης" onclick="document.body.classList.toggle('high-contrast')">◐ Αντίθεση</button>
+
+<!-- ═══════ START SCREEN (Level 0) ═══════ -->
+<div id="startScreen" role="dialog" aria-label="Αρχική οθόνη">
+  <div class="start-chars" aria-hidden="true"><span id="startEmoji1">👸</span><span id="startEmoji2">🦸‍♂️</span></div>
+  <h1 id="startTitle">🎂 Party Level!</h1>
+  <p class="sub" id="startSub">Διπλό πάρτι γενεθλίων σε περιμένει!</p>
+  <div class="instructions">
+    <div class="instr-title">🎮 Πώς να παίξεις</div>
+    <div class="instr-row"><span class="instr-icon">👆</span><span>Πάτα τα βέλη <b>◀ ▶</b> για να περπατήσεις</span></div>
+    <div class="instr-row"><span class="instr-icon">✊</span><span>Κράτα πατημένο για να <b>τρέξεις!</b></span></div>
+    <div class="instr-row"><span class="instr-icon">⌨️</span><span>Ή χρησιμοποίησε τα βέλη ← →</span></div>
+  </div>
+  <button class="btn" id="startBtn" aria-label="Ξεκίνα την περιπέτεια"></button>
+</div>
+
+<!-- ═══════ MOVEMENT CONTROLS ═══════ -->
+<div id="moveControls">
+  <button class="move-btn" id="moveLeft" aria-label="Κίνηση αριστερά">◀</button>
+  <button class="move-btn" id="moveRight" aria-label="Κίνηση δεξιά">▶</button>
+</div>
+
+<!-- ═══════ RUNNING CHARACTERS (fixed at bottom) ═══════ -->
+<div id="characters-container" class="char-idle" aria-hidden="true">
+  <!-- Πριγκίπισσα – Ελένη -->
+  <div class="princess" id="princessChar" title="Ελένη">
+    <div class="tiara"></div>
+    <div class="hair"></div>
+    <div class="head"></div>
+    <div class="dress"></div>
+    <div class="skirt"></div>
+    <div class="leg-l"></div>
+    <div class="leg-r"></div>
+  </div>
+  <!-- Υπερήρωας – Γιώργος -->
+  <div class="superhero" id="superheroChar" title="Γιώργος">
+    <div class="s-hair"></div>
+    <div class="head"></div>
+    <div class="mask"></div>
+    <div class="cape"></div>
+    <div class="s-body"></div>
+    <div class="emblem" id="heroEmblem">⚡</div>
+    <div class="leg-l"></div>
+    <div class="leg-r"></div>
+  </div>
+</div>
+
+<!-- ═══════ CAMERA & WORLD ═══════ -->
+<div id="camera">
+<div id="world">
+
+  <!-- SKY -->
+  <div class="sky" id="skyLayer"></div>
+
+  <!-- STARS -->
+  <div class="stars-layer" id="starsLayer"></div>
+
+  <!-- CLOUDS (parallax slow) -->
+  <div class="clouds-layer" id="cloudsLayer">
+    <div class="cloud" style="width:140px;height:40px;top:10%;left:200px"></div>
+    <div class="cloud" style="width:100px;height:30px;top:18%;left:900px"></div>
+    <div class="cloud" style="width:160px;height:45px;top:8%;left:1800px"></div>
+    <div class="cloud" style="width:120px;height:35px;top:22%;left:2600px"></div>
+    <div class="cloud" style="width:90px;height:28px;top:12%;left:3400px"></div>
+    <div class="cloud" style="width:150px;height:42px;top:15%;left:4300px"></div>
+    <div class="cloud" style="width:110px;height:32px;top:6%;left:5200px"></div>
+    <div class="cloud" style="width:130px;height:38px;top:20%;left:6100px"></div>
+    <div class="cloud" style="width:100px;height:30px;top:10%;left:7000px"></div>
+    <div class="cloud" style="width:160px;height:44px;top:16%;left:7800px"></div>
+  </div>
+
+  <!-- HILLS (parallax medium) -->
+  <div class="hills-layer" id="hillsLayer">
+    <div class="hill" style="width:500px;height:120px;left:100px;background:#1a3a5c"></div>
+    <div class="hill" style="width:400px;height:90px;left:500px;background:#1e4066"></div>
+    <div class="hill" style="width:600px;height:140px;left:1200px;background:#1a3a5c"></div>
+    <div class="hill" style="width:350px;height:80px;left:2000px;background:#1e4066"></div>
+    <div class="hill" style="width:500px;height:110px;left:2800px;background:#1a3a5c"></div>
+    <div class="hill" style="width:450px;height:100px;left:3600px;background:#1e4066"></div>
+    <div class="hill" style="width:550px;height:130px;left:4500px;background:#1a3a5c"></div>
+    <div class="hill" style="width:400px;height:90px;left:5400px;background:#1e4066"></div>
+    <div class="hill" style="width:500px;height:120px;left:6200px;background:#1a3a5c"></div>
+    <div class="hill" style="width:450px;height:100px;left:7200px;background:#1e4066"></div>
+  </div>
+
+  <!-- TREES -->
+  <div class="tree" style="left:350px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:800px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:1600px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:2200px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:3200px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:4100px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:5000px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:5800px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:6600px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+  <div class="tree" style="left:7600px"><div class="tree-top"></div><div class="tree-trunk"></div></div>
+
+  <!-- CASTLES -->
+  <div class="castle" style="left:100px">
+    <div class="castle-body"><div class="castle-tower lt"></div><div class="castle-tower rt"></div><div class="castle-door"></div></div>
+  </div>
+  <div class="castle" style="left:4600px">
+    <div class="castle-body"><div class="castle-tower lt"></div><div class="castle-tower rt"></div><div class="castle-door"></div></div>
+  </div>
+  <div class="castle" style="left:7800px">
+    <div class="castle-body"><div class="castle-tower lt"></div><div class="castle-tower rt"></div><div class="castle-door"></div></div>
+  </div>
+
+  <!-- QUESTION BLOCKS -->
+  <div class="q-block" style="left:600px" data-reward="⭐" tabindex="0" aria-label="Κουτί έκπληξη">?</div>
+  <div class="q-block" style="left:1400px" data-reward="🌟" tabindex="0" aria-label="Κουτί έκπληξη">?</div>
+  <div class="q-block" style="left:2500px" data-reward="👑" tabindex="0" aria-label="Κουτί έκπληξη">?</div>
+  <div class="q-block" style="left:3500px" data-reward="✨" tabindex="0" aria-label="Κουτί έκπληξη">?</div>
+  <div class="q-block" style="left:5500px" data-reward="💎" tabindex="0" aria-label="Κουτί έκπληξη">?</div>
+  <div class="q-block" style="left:6800px" data-reward="🎁" tabindex="0" aria-label="Κουτί έκπληξη">?</div>
+
+  <!-- COINS -->
+  <div class="coin" style="left:450px;bottom:calc(18vh + 50px)"></div>
+  <div class="coin" style="left:480px;bottom:calc(18vh + 70px)"></div>
+  <div class="coin" style="left:510px;bottom:calc(18vh + 50px)"></div>
+  <div class="coin" style="left:1050px;bottom:calc(18vh + 60px)"></div>
+  <div class="coin" style="left:1080px;bottom:calc(18vh + 80px)"></div>
+  <div class="coin" style="left:1110px;bottom:calc(18vh + 60px)"></div>
+  <div class="coin" style="left:1900px;bottom:calc(18vh + 55px)"></div>
+  <div class="coin" style="left:1930px;bottom:calc(18vh + 75px)"></div>
+  <div class="coin" style="left:2900px;bottom:calc(18vh + 50px)"></div>
+  <div class="coin" style="left:2930px;bottom:calc(18vh + 70px)"></div>
+  <div class="coin" style="left:2960px;bottom:calc(18vh + 90px)"></div>
+  <div class="coin" style="left:3800px;bottom:calc(18vh + 55px)"></div>
+  <div class="coin" style="left:3830px;bottom:calc(18vh + 75px)"></div>
+  <div class="coin" style="left:5100px;bottom:calc(18vh + 50px)"></div>
+  <div class="coin" style="left:5130px;bottom:calc(18vh + 70px)"></div>
+  <div class="coin" style="left:6300px;bottom:calc(18vh + 60px)"></div>
+  <div class="coin" style="left:6330px;bottom:calc(18vh + 80px)"></div>
+  <div class="coin" style="left:7300px;bottom:calc(18vh + 50px)"></div>
+  <div class="coin" style="left:7330px;bottom:calc(18vh + 70px)"></div>
+  <div class="coin" style="left:7360px;bottom:calc(18vh + 90px)"></div>
+
+  <!-- WORLD FLOWER DECORATIONS -->
+  <div class="world-deco" style="left:300px;bottom:calc(18vh + 3px);font-size:1.3rem">🌷</div>
+  <div class="world-deco" style="left:750px;bottom:calc(18vh + 3px);font-size:1.1rem">🌻</div>
+  <div class="world-deco" style="left:1500px;bottom:calc(18vh + 3px);font-size:1.3rem">🌸</div>
+  <div class="world-deco" style="left:2100px;bottom:calc(18vh + 3px);font-size:1.1rem">🍄</div>
+  <div class="world-deco" style="left:3100px;bottom:calc(18vh + 3px);font-size:1.3rem">🌹</div>
+  <div class="world-deco" style="left:4000px;bottom:calc(18vh + 3px);font-size:1.1rem">🌼</div>
+  <div class="world-deco" style="left:5600px;bottom:calc(18vh + 3px);font-size:1.3rem">🌺</div>
+  <div class="world-deco" style="left:6500px;bottom:calc(18vh + 3px);font-size:1.1rem">🌷</div>
+  <div class="world-deco" style="left:7500px;bottom:calc(18vh + 3px);font-size:1.3rem">🌻</div>
+
+  <!-- LEVEL SIGNS -->
+  <div class="level-sign" style="left:220px"><div class="level-sign-board">START</div><div class="level-sign-post"></div></div>
+  <div class="level-sign" style="left:1300px"><div class="level-sign-board">LEVEL 1</div><div class="level-sign-post"></div></div>
+  <div class="level-sign" style="left:2900px"><div class="level-sign-board">LEVEL 2</div><div class="level-sign-post"></div></div>
+  <div class="level-sign" style="left:4500px"><div class="level-sign-board">LEVEL 3</div><div class="level-sign-post"></div></div>
+  <div class="level-sign" style="left:5900px"><div class="level-sign-board">LEVEL 4</div><div class="level-sign-post"></div></div>
+  <div class="level-sign" style="left:7200px"><div class="level-sign-board">🏆 ΤΕΛΟΣ</div><div class="level-sign-post"></div></div>
+
+  <!-- ═══════════════════════════════════════
+       ZONE CONTENT PANELS
+       ═══════════════════════════════════════ -->
+
+  <!-- LEVEL 1 – HEROES -->
+  <div class="zone-panel" id="zone1" style="left:1350px;bottom:calc(18vh + 100px)" aria-label="Ήρωες">
+    <div class="zone-title" id="zone1Title">🦸 Heroes!</div>
+    <div class="zone-sub" id="zone1Sub">Γνώρισε τους ήρωες του πάρτι</div>
+    <div class="characters">
+      <div class="character-card" id="card1" tabindex="0" role="figure" aria-label="">
+        <span class="char-emoji" id="card1Emoji"></span>
+        <div class="char-name" id="card1Name"></div>
+        <div class="char-age" id="card1Age"></div>
+      </div>
+      <div class="character-card" id="card2" tabindex="0" role="figure" aria-label="">
+        <span class="char-emoji" id="card2Emoji"></span>
+        <div class="char-name" id="card2Name"></div>
+        <div class="char-age" id="card2Age"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL 2 – TIME QUEST -->
+  <div class="zone-panel" id="zone2" style="left:2950px;bottom:calc(18vh + 100px)" aria-label="Ημερομηνία">
+    <div class="zone-title" id="zone2Title">⏰ Time Quest</div>
+    <div class="info-card" style="cursor:pointer" onclick="addToCalendar()" role="button" tabindex="0" aria-label="Πρόσθεσε στο ημερολόγιο">
+      <div class="info-icon mini-cal" id="miniCalBtn" title=""><div class="mini-cal-hdr" id="miniCalHdr"></div><div class="mini-cal-day" id="miniCalDay"></div></div>
+      <div class="info-label" id="zone2DateLabel">Ημερομηνία</div>
+      <div class="info-value" id="zone2Date"></div>
+      <div style="font-size:.65rem;opacity:.5;margin-top:4px">📅 Πάτα για λήψη</div>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">🕙</div>
+      <div class="info-label" id="zone2TimeLabel">Ώρα</div>
+      <div class="info-value" id="zone2Time"></div>
+    </div>
+  </div>
+
+  <!-- FLYING SUPERHERO GUIDE (appears at Time Quest) -->
+  <div id="flyHero">
+    <div class="fh-speech" id="fhSpeech" onclick="addToCalendar()"></div>
+    <div class="fly-hero-body">
+      <div class="fh-cape"></div>
+      <div class="fh-head"></div>
+      <div class="fh-mask"></div>
+      <div class="fh-torso"></div>
+      <div class="fh-emblem" id="fhEmblem">⚡</div>
+      <div class="fh-arm-point"><span class="fh-hand">☝️</span></div>
+      <div class="fh-arm-up"></div>
+      <div class="fh-legs"><div class="fh-leg"></div><div class="fh-leg"></div></div>
+    </div>
+  </div>
+
+  <!-- LEVEL 3 – LOCATION PORTAL -->
+  <div class="zone-panel" id="zone3" style="left:4550px;bottom:calc(18vh + 100px)" aria-label="Τοποθεσία">
+    <div class="zone-title" id="zone3Title">📍 Location Portal</div>
+    <div class="info-card">
+      <div class="info-icon">🏰</div>
+      <div class="info-label" id="zone3VenueLabel">Χώρος</div>
+      <div class="info-value" id="zone3Venue"></div>
+      <div class="zone-text" id="zone3Address" style="margin-top:6px"></div>
+    </div>
+    <div class="btn-group">
+      <a class="btn btn-green" id="zone3MapsLink" href="" target="_blank" rel="noopener noreferrer"></a>
+      <a class="btn btn-blue" id="zone3WebLink" href="" target="_blank" rel="noopener noreferrer"></a>
+    </div>
+  </div>
+
+  <!-- LEVEL 4 – RSVP QUEST (ΜΟΝΟ ΕΔΩ το "Ενημερώστε…") -->
+  <div class="zone-panel" id="zone4" style="left:5950px;bottom:calc(18vh + 100px)" aria-label="RSVP">
+    <div class="zone-title" id="zone4Title">📩 RSVP Quest</div>
+    <div class="zone-sub" id="zone4Sub"><span id="zone4DeadlinePrefix"></span><br><span class="rsvp-date-wrap" id="rsvpDateWrap"><span id="rsvpDeadlineText"></span><svg class="pink-circle-svg" id="pinkCircleSvg" width="0" height="0"><ellipse cx="0" cy="0" rx="0" ry="0"/></svg></span></div>
+    <!-- Flying girl orbit container (outside the span for valid HTML) -->
+    <div id="flyGirl"><div class="girl-sprite"><div class="gs-cape"></div><div class="gs-head"></div><div class="gs-mask"></div><div class="gs-torso"></div><div class="gs-emblem" id="gsEmblem">⭐</div><div class="gs-skirt"></div><div class="gs-arm left"></div><div class="gs-arm right"></div><div class="gs-legs"><div class="gs-leg"></div><div class="gs-leg"></div></div></div></div>
+    <div class="btn-group">
+      <a class="btn btn-pink" id="rsvpCallBtn" href="" aria-label=""></a>
+      <button class="btn btn-purple" id="rsvpViberBtn" onclick="sendRSVP('viber')" aria-label="Στείλε Viber"></button>
+    </div>
+    <div class="info-chip" id="allergenChip" role="note"></div>
+  </div>
+
+  <!-- FINAL – THANK YOU -->
+  <div class="zone-panel" id="zone5" style="left:7250px;bottom:calc(18vh + 100px)" aria-label="Ευχαριστούμε">
+    <div class="zone-title" id="zone5Title"></div>
+    <div class="zone-sub" id="zone5Sub"></div>
+  </div>
+
+  <!-- GROUND -->
+  <div class="ground" id="groundLayer">
+    <div class="ground-grass"></div>
+    <div class="ground-dirt"></div>
+  </div>
+
+</div><!-- /world -->
+</div><!-- /camera -->
+
+<!-- CONFETTI & TOAST -->
+<div class="confetti-box" id="confettiBox" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════ -->
+<script src="settings.js"></script>
+<script>
+(function(){
+'use strict';
+
+var WORLD_W = 8400;
+
+/* ── DOM refs ── */
+var world       = document.getElementById('world');
+var meterFill   = document.getElementById('meterFill');
+var meterLabel  = document.getElementById('meterLabel');
+var coinCounter = document.getElementById('coinCounter');
+var startScreen = document.getElementById('startScreen');
+var startBtn    = document.getElementById('startBtn');
+var confettiBox = document.getElementById('confettiBox');
+var charsCont   = document.getElementById('characters-container');
+var starsLayer  = document.getElementById('starsLayer');
+var cloudsLayer = document.getElementById('cloudsLayer');
+var hillsLayer  = document.getElementById('hillsLayer');
+var skyEl       = document.getElementById('skyLayer');
+var groundEl    = document.getElementById('groundLayer');
+var moveCtrl    = document.getElementById('moveControls');
+var moveLeftBtn = document.getElementById('moveLeft');
+var moveRightBtn= document.getElementById('moveRight');
+var flyEl       = document.getElementById('flyHero');
+
+var zonePanels = [
+  null,
+  document.getElementById('zone1'),
+  document.getElementById('zone2'),
+  document.getElementById('zone3'),
+  document.getElementById('zone4'),
+  document.getElementById('zone5')
+];
+/* Store original left positions for zone detection (mobile repositions panels) */
+var zoneOrigLeft = [0];
+for(var zi=1;zi<zonePanels.length;zi++){
+  zoneOrigLeft.push(parseInt(zonePanels[zi].style.left)||0);
+}
+
+/* ── State ── */
+var started      = false;
+var coins        = 0;
+var confettiDone = false;
+var heroFlying   = false;
+var heroTimeout  = null;
+var flyGirlEl    = document.getElementById('flyGirl');
+var pinkCircle   = document.getElementById('pinkCircleSvg');
+var rsvpDateWrap = document.getElementById('rsvpDateWrap');
+var girlSprite   = flyGirlEl ? flyGirlEl.querySelector('.girl-sprite') : null;
+var girlPhase    = 'idle';   /* idle | fly-in | orbit | fly-out | done */
+var girlAnimId   = null;
+var girlAnimStart= 0;
+var girlRx = 0, girlRy = 0, girlPerim = 0, girlEll = null;
+var girlEraseTimer = null;
+
+/* ══════════════════════════════════════════
+   POPULATE DOM FROM PARTY SETTINGS
+   ══════════════════════════════════════════ */
+(function applySettings(){
+  var P = window.PARTY; if(!P) return;
+  var c1 = P.child1, c2 = P.child2, d = P.date, v = P.venue, r = P.rsvp, t = P.text;
+
+  /* Page title */
+  document.title = P.pageTitle;
+
+  /* Start screen */
+  var se1=document.getElementById('startEmoji1'); if(se1) se1.textContent=c1.emoji;
+  var se2=document.getElementById('startEmoji2'); if(se2) se2.textContent=c2.emoji;
+  var st =document.getElementById('startTitle');  if(st)  st.textContent=t.startScreenTitle;
+  var ss =document.getElementById('startSub');    if(ss)  ss.textContent=t.startScreenSub;
+  startBtn.textContent = t.startBtnLabel;
+
+  /* Running characters */
+  var pc=document.getElementById('princessChar');  if(pc) pc.title=c1.title;
+  var sc=document.getElementById('superheroChar'); if(sc) sc.title=c2.title;
+  var he=document.getElementById('heroEmblem');    if(he) he.textContent=c2.emblem;
+
+  /* Zone 1 – Heroes */
+  var z1t=document.getElementById('zone1Title'); if(z1t) z1t.textContent=t.zone1Title;
+  var z1s=document.getElementById('zone1Sub');   if(z1s) z1s.textContent=t.zone1Sub;
+  var c1e=document.getElementById('card1Emoji'); if(c1e) c1e.textContent=c1.emoji;
+  var c1n=document.getElementById('card1Name');  if(c1n) c1n.textContent=c1.name;
+  var c1a=document.getElementById('card1Age');   if(c1a) c1a.textContent=c1.turnLabel;
+  var cd1=document.getElementById('card1');       if(cd1) cd1.setAttribute('aria-label',c1.ariaLabel);
+  var c2e=document.getElementById('card2Emoji'); if(c2e) c2e.textContent=c2.emoji;
+  var c2n=document.getElementById('card2Name');  if(c2n) c2n.textContent=c2.name;
+  var c2a=document.getElementById('card2Age');   if(c2a) c2a.textContent=c2.turnLabel;
+  var cd2=document.getElementById('card2');       if(cd2) cd2.setAttribute('aria-label',c2.ariaLabel);
+
+  /* Zone 2 – Time Quest */
+  var z2t=document.getElementById('zone2Title');    if(z2t) z2t.textContent=t.zone2Title;
+  var z2dl=document.getElementById('zone2DateLabel');if(z2dl) z2dl.textContent=t.zone2DateLabel;
+  var z2tl=document.getElementById('zone2TimeLabel');if(z2tl) z2tl.textContent=t.zone2TimeLabel;
+  var z2d=document.getElementById('zone2Date');      if(z2d) z2d.textContent=d.full;
+  var z2tm=document.getElementById('zone2Time');     if(z2tm) z2tm.textContent=d.time;
+  var mch=document.getElementById('miniCalHdr');     if(mch) mch.textContent=d.miniCalMon;
+  var mcd=document.getElementById('miniCalDay');     if(mcd) mcd.textContent=d.miniCalDay;
+  var mcb=document.getElementById('miniCalBtn');     if(mcb) mcb.title=t.zone2CalendarTooltip;
+
+  /* FlyHero */
+  var fhs=document.getElementById('fhSpeech');   if(fhs) fhs.innerHTML=t.speechBubble;
+  var fhe=document.getElementById('fhEmblem');   if(fhe) fhe.textContent=c2.emblem;
+
+  /* Zone 3 – Location */
+  var z3t=document.getElementById('zone3Title');     if(z3t) z3t.textContent=t.zone3Title;
+  var z3vl=document.getElementById('zone3VenueLabel');if(z3vl) z3vl.textContent=t.zone3VenueLabel;
+  var z3v=document.getElementById('zone3Venue');      if(z3v) z3v.textContent=v.name;
+  var z3a=document.getElementById('zone3Address');    if(z3a) z3a.textContent=v.address;
+  var z3m=document.getElementById('zone3MapsLink');   if(z3m){z3m.href=v.mapsUrl; z3m.textContent=t.zone3DirectionsBtn;}
+  var z3w=document.getElementById('zone3WebLink');    if(z3w){z3w.href=v.website; z3w.textContent=t.zone3WebsiteBtn;}
+
+  /* Zone 4 – RSVP */
+  var z4t=document.getElementById('zone4Title');          if(z4t) z4t.textContent=t.zone4Title;
+  var z4dp=document.getElementById('zone4DeadlinePrefix');if(z4dp) z4dp.textContent=t.zone4DeadlinePrefix;
+  var z4dt=document.getElementById('rsvpDeadlineText');   if(z4dt) z4dt.textContent=r.deadline;
+  var rcb=document.getElementById('rsvpCallBtn');
+  if(rcb){ rcb.href='tel:'+r.phone; rcb.setAttribute('aria-label','Κάλεσε στο '+r.phone); rcb.textContent=t.zone4CallBtn; }
+  var rvb=document.getElementById('rsvpViberBtn');        if(rvb) rvb.textContent=t.zone4ViberBtn;
+  var alc=document.getElementById('allergenChip');        if(alc) alc.textContent=r.allergenNote;
+
+  /* Girl emblem */
+  var gse=document.getElementById('gsEmblem'); if(gse) gse.textContent=c1.emblem;
+
+  /* Zone 5 – Final */
+  var z5t=document.getElementById('zone5Title'); if(z5t) z5t.textContent=t.zone5Title;
+  var z5s=document.getElementById('zone5Sub');   if(z5s) z5s.textContent=t.zone5Sub;
+
+  /* Toast */
+  var toast=document.getElementById('toast'); if(toast) toast.textContent=t.toastCopied;
+})();
+
+/* ── Girl superhero animation sequence ── */
+function startGirlSequence(panel){
+  var wrap = rsvpDateWrap;
+  if(!wrap || !pinkCircle || !flyGirlEl || !girlSprite) return;
+
+  /* Cancel any pending erase */
+  if(girlEraseTimer){ clearTimeout(girlEraseTimer); girlEraseTimer = null; }
+  if(girlAnimId){ cancelAnimationFrame(girlAnimId); girlAnimId = null; }
+
+  /* Position flyGirl at center of date text */
+  var wrapR  = wrap.getBoundingClientRect();
+  var panelR = panel.getBoundingClientRect();
+  var gx = (wrapR.left + wrapR.width/2) - panelR.left;
+  var gy = (wrapR.top  + wrapR.height/2) - panelR.top;
+  flyGirlEl.style.left = gx + 'px';
+  flyGirlEl.style.top  = gy + 'px';
+
+  /* Size the SVG ellipse to fit the date text */
+  var sw = wrapR.width  + 28;
+  var sh = wrapR.height + 20;
+  girlRx = sw/2 - 2;
+  girlRy = sh/2 - 2;
+  girlEll = pinkCircle.querySelector('ellipse');
+  pinkCircle.setAttribute('width',  sw);
+  pinkCircle.setAttribute('height', sh);
+  pinkCircle.setAttribute('viewBox','0 0 '+sw+' '+sh);
+  pinkCircle.style.width  = sw + 'px';
+  pinkCircle.style.height = sh + 'px';
+  pinkCircle.style.marginLeft = (-sw/2) + 'px';
+  pinkCircle.style.marginTop  = (-sh/2) + 'px';
+  girlEll.setAttribute('cx', sw/2);
+  girlEll.setAttribute('cy', sh/2);
+  girlEll.setAttribute('rx', girlRx);
+  girlEll.setAttribute('ry', girlRy);
+  girlEll.removeAttribute('transform');
+  girlPerim = Math.PI*(3*(girlRx+girlRy)-Math.sqrt((3*girlRx+girlRy)*(girlRx+3*girlRy)));
+  girlEll.style.transition = '';
+  girlEll.style.strokeDasharray  = girlPerim;
+  girlEll.style.strokeDashoffset = girlPerim; /* fully hidden */
+
+  /* Reset sprite */
+  girlSprite.style.transform = '';
+  flyGirlEl.style.opacity = '1';
+  girlPhase = 'fly-in';
+  girlAnimStart = performance.now();
+  girlAnimId = requestAnimationFrame(animateGirl);
+}
+
+function animateGirl(now){
+  var t, e, x, y, rot, sc, dur;
+  var elapsed = now - girlAnimStart;
+
+  if(girlPhase === 'fly-in'){
+    dur = 850;
+    t = Math.min(elapsed/dur, 1);
+    e = 1 - Math.pow(1-t, 3); /* ease-out cubic */
+    /* Swoop from upper-right to orbit start (right side of ellipse) */
+    var flyD = Math.min(180, window.innerWidth * 0.35);
+    var sx = girlRx + flyD, sy = -flyD * 0.8;
+    var ex = girlRx,        ey = 0;
+    x   = sx + (ex - sx) * e;
+    y   = sy + (ey - sy) * e;
+    rot = -360 * (1 - e);
+    sc  = 0.15 + 0.85 * e;
+    girlSprite.style.transform = 'translate('+x+'px,'+y+'px) rotate('+rot+'deg) scale('+sc+')';
+    if(t >= 1){
+      girlPhase = 'orbit';
+      girlAnimStart = now;
+      rsvpDateWrap.classList.add('glow');
+    }
+  } else if(girlPhase === 'orbit'){
+    dur = 2400;
+    t = Math.min(elapsed/dur, 1);
+    var angle = t * Math.PI * 2;
+    /* Position on ellipse – starts at right (3 o'clock), goes clockwise */
+    x = girlRx * Math.cos(angle);
+    y = girlRy * Math.sin(angle);
+    var bob = Math.sin(angle * 6) * 2;
+    girlSprite.style.transform = 'translate('+x+'px,'+(y+bob)+'px) scale(1)';
+    /* Draw circle in sync */
+    girlEll.style.strokeDashoffset = girlPerim * (1 - t);
+    if(t >= 1){
+      girlPhase = 'fly-out';
+      girlAnimStart = now;
+    }
+  } else if(girlPhase === 'fly-out'){
+    dur = 1500;
+    t = Math.min(elapsed/dur, 1);
+    var easeIn = t * t;
+    /* Spiral outward from right side of ellipse */
+    var spiralAngle = t * Math.PI * 3; /* 1.5 full spins */
+    var expandR = 1 + t * 2.5;
+    x   = girlRx * expandR * Math.cos(spiralAngle);
+    y   = -180 * easeIn;
+    rot = t * 720;
+    sc  = Math.max(1 - easeIn * 0.85, 0.15);
+    var op = Math.max(1 - easeIn, 0);
+    girlSprite.style.transform = 'translate('+x+'px,'+y+'px) rotate('+rot+'deg) scale('+sc+')';
+    flyGirlEl.style.opacity = op;
+    if(t >= 1){
+      girlPhase = 'done';
+      flyGirlEl.style.opacity = '0';
+      return; /* stop loop */
+    }
+  }
+  girlAnimId = requestAnimationFrame(animateGirl);
+}
+
+function stopGirlSequence(){
+  if(girlAnimId){ cancelAnimationFrame(girlAnimId); girlAnimId = null; }
+  girlPhase = 'idle';
+  flyGirlEl.style.opacity = '0';
+  if(girlSprite) girlSprite.style.transform = '';
+  rsvpDateWrap.classList.remove('glow');
+  /* Animate circle erase */
+  if(girlEll && girlPerim){
+    girlEll.style.transition = 'stroke-dashoffset .8s ease';
+    girlEll.style.strokeDashoffset = girlPerim;
+    girlEraseTimer = setTimeout(function(){
+      if(girlEll) girlEll.style.transition = '';
+      girlEraseTimer = null;
+    }, 900);
+  }
+}
+
+/* ── Movement state ── */
+var position     = 0;      /* 0 → 1 progress through world */
+var moveDir      = 0;      /* -1 left, 0 stop, 1 right */
+var holdStart    = 0;      /* timestamp when button was pressed */
+var moveState    = 'idle'; /* 'idle', 'walk', 'run' */
+var WALK_SPEED   = 0.0012; /* per frame (slow) */
+var RUN_SPEED    = 0.0035; /* per frame (fast) */
+var HOLD_TO_RUN  = 350;    /* ms before walk → run */
+var btnHeld      = 0;      /* which button: -1, 0, 1 */
+var keyHeldLeft  = false;
+var keyHeldRight = false;
+var isMobile     = window.innerWidth <= 768;
+
+/* ── Viewport & ground sync (fixes mobile Chrome 100vh bug) ── */
+function syncGroundLevel(){
+  var h = window.innerHeight;
+  isMobile = window.innerWidth <= 768;
+  var groundPx = Math.round(h * (isMobile ? 0.16 : 0.18));
+  var root = document.documentElement.style;
+  root.setProperty('--ground-h', groundPx + 'px');
+  root.setProperty('--full-h', h + 'px');
+}
+/* Patch inline styles that use 18vh → var(--ground-h) (runs once) */
+(function patchInlineVH(){
+  var els = world.querySelectorAll('[style*="18vh"]');
+  for(var i=0;i<els.length;i++){
+    var raw = els[i].getAttribute('style');
+    if(raw) els[i].setAttribute('style', raw.replace(/18vh/g,'var(--ground-h,18vh)'));
+  }
+})();
+syncGroundLevel();
+window.addEventListener('resize', syncGroundLevel);
+window.addEventListener('orientationchange', function(){ setTimeout(syncGroundLevel, 150); });
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', syncGroundLevel);
+}
+
+/* ── Stars ── */
+for(var i=0;i<150;i++){
+  var s=document.createElement('div');
+  s.className='star';
+  var sz=Math.random()*3+1;
+  s.style.cssText='width:'+sz+'px;height:'+sz+'px;top:'+Math.random()*100+'%;left:'+Math.random()*100+'%;animation-delay:'+Math.random()*4+'s';
+  starsLayer.appendChild(s);
+}
+
+/* ── Grass tufts ── */
+for(var i=0;i<200;i++){
+  var t=document.createElement('div');
+  t.className='tuft';
+  t.style.left=(i*42+Math.random()*20)+'px';
+  groundEl.appendChild(t);
+}
+
+/* ══════════════════════════════════════════
+   MOVEMENT HANDLERS
+   ══════════════════════════════════════════ */
+function startMove(dir){
+  moveDir = dir;
+  holdStart = Date.now();
+  moveState = 'walk';
+  if(dir === -1) moveLeftBtn.classList.add('pressed');
+  if(dir === 1)  moveRightBtn.classList.add('pressed');
+}
+function stopMove(){
+  moveDir = 0;
+  moveState = 'idle';
+  moveLeftBtn.classList.remove('pressed');
+  moveRightBtn.classList.remove('pressed');
+}
+function recalcDir(){
+  if(keyHeldRight && !keyHeldLeft){ if(moveDir!==1)startMove(1); }
+  else if(keyHeldLeft && !keyHeldRight){ if(moveDir!==-1)startMove(-1); }
+  else if(btnHeld!==0){ if(moveDir!==btnHeld)startMove(btnHeld); }
+  else stopMove();
+}
+
+/* On-screen buttons – mouse */
+moveRightBtn.addEventListener('mousedown',function(e){e.preventDefault();btnHeld=1;recalcDir();});
+moveLeftBtn.addEventListener('mousedown',function(e){e.preventDefault();btnHeld=-1;recalcDir();});
+document.addEventListener('mouseup',function(){if(btnHeld!==0){btnHeld=0;recalcDir();}});
+
+/* On-screen buttons – touch */
+moveRightBtn.addEventListener('touchstart',function(e){e.preventDefault();btnHeld=1;recalcDir();},{passive:false});
+moveLeftBtn.addEventListener('touchstart',function(e){e.preventDefault();btnHeld=-1;recalcDir();},{passive:false});
+moveRightBtn.addEventListener('touchend',function(e){e.preventDefault();btnHeld=0;recalcDir();},{passive:false});
+moveLeftBtn.addEventListener('touchend',function(e){e.preventDefault();btnHeld=0;recalcDir();},{passive:false});
+document.addEventListener('touchcancel',function(){if(btnHeld!==0){btnHeld=0;recalcDir();}});
+
+/* Keyboard hold */
+document.addEventListener('keydown',function(e){
+  if(!started)return;
+  if(e.repeat){e.preventDefault();return;}
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();keyHeldRight=true;recalcDir();}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();keyHeldLeft=true;recalcDir();}
+});
+document.addEventListener('keyup',function(e){
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){keyHeldRight=false;recalcDir();}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){keyHeldLeft=false;recalcDir();}
+});
+
+/* ── Start button ── */
+startBtn.addEventListener('click',function(){
+  started=true;
+  startScreen.classList.add('hidden');
+  moveCtrl.classList.add('active');
+  charsCont.classList.add('char-idle');
+});
+
+/* ══════════════════════════════════════════
+   MAIN ANIMATION LOOP
+   ══════════════════════════════════════════ */
+function onFrame(){
+  if(!started){requestAnimationFrame(onFrame);return}
+
+  /* ── Update position from movement ── */
+  if(moveDir !== 0){
+    var holdMs = Date.now() - holdStart;
+    if(holdMs > HOLD_TO_RUN){
+      moveState = 'run';
+      position += moveDir * RUN_SPEED;
+    } else {
+      moveState = 'walk';
+      position += moveDir * WALK_SPEED;
+    }
+    position = Math.max(0, Math.min(1, position));
+  } else {
+    moveState = 'idle';
+  }
+
+  /* ── Character animation state ── */
+  charsCont.classList.toggle('char-idle', moveState === 'idle');
+  charsCont.classList.toggle('char-walk', moveState === 'walk');
+  charsCont.classList.toggle('char-run',  moveState === 'run');
+
+  /* ── Flip characters when moving left ── */
+  if(moveDir === -1){
+    charsCont.style.transform = 'translateX(-50%) scaleX(-1)';
+  } else {
+    charsCont.style.transform = 'translateX(-50%)';
+  }
+
+  /* ── World translation ── */
+  var pct = position;
+  var maxTx = WORLD_W - window.innerWidth;
+  var tx = -pct * maxTx;
+  world.style.transform = 'translate3d(' + tx + 'px,0,0)';
+
+  /* ── Parallax layers ── */
+  cloudsLayer.style.transform = 'translate3d(' + (-tx * 0.15) + 'px,0,0)';
+  hillsLayer.style.transform  = 'translate3d(' + (-tx * 0.08) + 'px,0,0)';
+  starsLayer.style.transform  = 'translate3d(' + (-tx * 0.03) + 'px,0,0)';
+
+  /* ── Party meter ── */
+  var mp = Math.round(pct * 100);
+  meterFill.style.width = mp + '%';
+  meterLabel.textContent = '\u{1F389} ' + mp + '%';
+
+  /* ── Zone panel reveal ── */
+  var cx = -tx + window.innerWidth / 2;
+  var isMob = window.innerWidth <= 768;
+  for(var z = 1; z < zonePanels.length; z++){
+    var p = zonePanels[z];
+    if(!p) continue;
+    var px = zoneOrigLeft[z];
+    var inRange = Math.abs(cx - px - 200) < window.innerWidth * 0.55;
+    if(inRange) p.classList.add('visible');
+    else p.classList.remove('visible');
+
+    /* On mobile, dynamically position panels at viewport center */
+    if(isMob){
+      if(inRange){
+        var vpCenterX = -tx + window.innerWidth / 2;
+        var pw = p.offsetWidth || 300;
+        var ph = p.offsetHeight || 300;
+        p.style.left = (vpCenterX - pw / 2) + 'px';
+        p.style.bottom = 'auto';
+        p.style.top = ((window.innerHeight - ph) / 2) + 'px';
+      } else {
+        /* Restore original position when leaving range */
+        p.style.left = zoneOrigLeft[z] + 'px';
+        p.style.bottom = '';
+        p.style.top = '';
+      }
+    }
+
+    /* Flying girl superhero for zone4 (RSVP) */
+    if(z === 4 && flyGirlEl){
+      if(inRange && girlPhase === 'idle'){
+        startGirlSequence(p);
+      } else if(!inRange && girlPhase !== 'idle'){
+        stopGirlSequence();
+      }
+    }
+
+    /* Flying superhero for zone2 */
+    if(z === 2 && flyEl){
+      if(inRange && !heroFlying){
+        heroFlying = true;
+        if(heroTimeout){ clearTimeout(heroTimeout); heroTimeout = null; }
+        /* On mobile, position hero above the centered panel */
+        if(isMob){
+          var vpCX = -tx + window.innerWidth / 2;
+          var ph2 = p.offsetHeight || 250;
+          var panelTop2 = (window.innerHeight - ph2) / 2;
+          flyEl.style.left = (vpCX + 10) + 'px';
+          flyEl.style.bottom = 'auto';
+          flyEl.style.top = Math.max(panelTop2 - 80, 8) + 'px';
+        }
+        /* Reset to base hidden state, then let CSS transition to hero-in */
+        flyEl.classList.remove('hero-out');
+        flyEl.classList.remove('hero-in');
+        flyEl.style.transition = '';
+        flyEl.style.opacity = '';
+        flyEl.style.transform = '';
+        void flyEl.offsetWidth; /* reflow at base (hidden) state */
+        flyEl.classList.add('hero-in'); /* CSS transition fires */
+      } else if(!inRange && heroFlying){
+        heroFlying = false;
+        /* Restore original position on mobile */
+        if(isMob){
+          flyEl.style.left = '';
+          flyEl.style.bottom = '';
+          flyEl.style.top = '';
+        }
+        flyEl.classList.remove('hero-in');
+        flyEl.style.transition = '';
+        flyEl.style.opacity = '';
+        flyEl.style.transform = '';
+        void flyEl.offsetWidth;
+        flyEl.classList.add('hero-out');
+        heroTimeout = setTimeout(function(){ flyEl.classList.remove('hero-out'); }, 1500);
+      }
+    }
+  }
+
+  /* ── Auto-hit question blocks ── */
+  autoHitBlocks(cx);
+
+  /* ── Auto-collect coins ── */
+  collectCoins(cx);
+
+  /* ── Sky color shift ── */
+  updateSky(pct);
+
+  /* ── Confetti at end ── */
+  if(pct > 0.92 && !confettiDone){
+    launchConfetti();
+    confettiDone = true;
+    charsCont.classList.add('victory-jump');
+    charsCont.classList.remove('char-idle');
+    charsCont.classList.remove('char-walk');
+    charsCont.classList.remove('char-run');
+    /* Easter egg: TARDIS fly-by after a short delay */
+    setTimeout(launchTardis, 3500);
+  }
+
+  requestAnimationFrame(onFrame);
+}
+requestAnimationFrame(onFrame);
+
+/* ── Coin collection ── */
+var allCoins = document.querySelectorAll('.coin');
+function collectCoins(cx){
+  for(var i=0;i<allCoins.length;i++){
+    var c=allCoins[i];
+    if(c.classList.contains('collected')) continue;
+    if(Math.abs(cx - parseInt(c.style.left)) < 120){
+      c.classList.add('collected');
+      coins++;
+      coinCounter.textContent='🪙 '+coins;
+      var b=document.createElement('div');
+      b.className='coin-burst';b.textContent='🪙';
+      var r=c.getBoundingClientRect();
+      b.style.left=r.left+'px';b.style.top=r.top+'px';
+      document.body.appendChild(b);
+      setTimeout(function(){b.remove()},700);
+    }
+  }
+}
+
+/* ── Question blocks (click handler) ── */
+function hitBlock(qb){
+  if(qb.classList.contains('hit'))return;
+  qb.classList.add('hit');
+  qb.textContent=qb.getAttribute('data-reward');
+  qb.style.background='#aaa';qb.style.borderColor='#888';qb.style.color='#fff';
+  coins+=5; coinCounter.textContent='\uD83E\uDE99 '+coins;
+  var b=document.createElement('div');
+  b.className='coin-burst';b.textContent=qb.getAttribute('data-reward')+' +5';
+  b.style.fontSize='1.2rem';
+  var r=qb.getBoundingClientRect();
+  b.style.left=r.left+'px';b.style.top=r.top+'px';
+  document.body.appendChild(b);
+  setTimeout(function(){b.remove()},700);
+}
+document.querySelectorAll('.q-block').forEach(function(qb){
+  qb.addEventListener('click',function(){ hitBlock(qb); });
+});
+
+/* ── Auto-hit blocks when heroes walk under them ── */
+var allBlocks = document.querySelectorAll('.q-block');
+var jumping = false;
+function autoHitBlocks(cx){
+  if(jumping) return;
+  for(var i=0;i<allBlocks.length;i++){
+    var qb = allBlocks[i];
+    if(qb.classList.contains('hit')) continue;
+    var bx = parseInt(qb.style.left) + 18; /* center of 36px block */
+    if(Math.abs(cx - bx) < 80){
+      jumping = true;
+      /* Jump animation on characters */
+      charsCont.classList.remove('char-jump');
+      void charsCont.offsetWidth; /* reflow to restart animation */
+      charsCont.classList.add('char-jump');
+      /* Hit the block at peak of jump (40% of 450ms ≈ 180ms) */
+      (function(block){
+        setTimeout(function(){
+          hitBlock(block);
+        }, 180);
+      })(qb);
+      /* Remove jump class after animation ends */
+      setTimeout(function(){
+        charsCont.classList.remove('char-jump');
+        jumping = false;
+      }, 460);
+      break; /* one block at a time */
+    }
+  }
+}
+
+/* ── Hero card animations ── */
+var unicornEmojis=['🦄','🦄','🦄','🌸','💖','✨'];
+var toolEmojis=['🔧','🔨','🪛','⚙️','🛠️','🪚'];
+var fxOverlay=document.createElement('div');
+fxOverlay.className='fx-overlay';
+document.body.appendChild(fxOverlay);
+
+function launchUnicorns(){
+  for(var i=0;i<18;i++){
+    (function(idx){setTimeout(function(){
+      var u=document.createElement('div');
+      var fromRight=Math.random()>.5;
+      u.className='unicorn-fly'+(fromRight?' from-right':'');
+      u.textContent=unicornEmojis[Math.floor(Math.random()*unicornEmojis.length)];
+      u.style.top=(Math.random()*70+5)+'%';
+      if(fromRight){ u.style.right='-60px'; } else { u.style.left='-60px'; }
+      u.style.animationDuration=(Math.random()*1.5+2)+'s';
+      u.style.fontSize=(Math.random()*1+1.8)+'rem';
+      fxOverlay.appendChild(u);
+      setTimeout(function(){u.remove()},4500);
+    },idx*120)})(i);
+  }
+}
+
+function launchTools(){
+  for(var i=0;i<20;i++){
+    (function(idx){setTimeout(function(){
+      var t=document.createElement('div');
+      t.className='tool-fall';
+      t.textContent=toolEmojis[Math.floor(Math.random()*toolEmojis.length)];
+      t.style.left=(Math.random()*90+5)+'%';
+      t.style.top='-40px';
+      t.style.animationDuration=(Math.random()*1.5+1.5)+'s';
+      t.style.fontSize=(Math.random()*0.8+1.6)+'rem';
+      fxOverlay.appendChild(t);
+      setTimeout(function(){t.remove()},4000);
+    },idx*100)})(i);
+  }
+}
+
+var card1El=document.getElementById('card1');
+var card2El=document.getElementById('card2');
+if(card1El) card1El.addEventListener('click',function(e){e.stopPropagation();launchUnicorns();});
+if(card2El) card2El.addEventListener('click',function(e){e.stopPropagation();launchTools();});
+
+/* ── Click sparkle ── */
+var sparkles=['⭐','✨','💫','🌟','👑'];
+document.addEventListener('click',function(e){
+  if(e.target.closest('.btn,.q-block,.contrast-btn,.move-btn,.character-card'))return;
+  var sp=document.createElement('div');
+  sp.className='coin-burst';
+  sp.textContent=sparkles[Math.floor(Math.random()*sparkles.length)];
+  sp.style.left=e.clientX+'px';sp.style.top=e.clientY+'px';
+  document.body.appendChild(sp);
+  setTimeout(function(){sp.remove()},700);
+});
+
+/* ── Send RSVP message via app ── */
+var RSVP_PHONE = PARTY.rsvp.phoneIntl;
+var RSVP_MSG = (PARTY.text.viberMessage || '')
+  .replace(/\{child1\}/g, PARTY.child1.nameAccu)
+  .replace(/\{child2\}/g, PARTY.child2.nameAccu);
+
+window.sendRSVP = function(app) {
+  if (app === 'viber') {
+    /* Copy RSVP message to clipboard */
+    var copied = false;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(RSVP_MSG).then(function(){
+        openViberChat();
+      }).catch(function(){ fallbackCopyAndOpen(); });
+      copied = true;
+    }
+    if (!copied) { fallbackCopyAndOpen(); }
+  }
+
+  function fallbackCopyAndOpen() {
+    var ta = document.createElement('textarea');
+    ta.value = RSVP_MSG;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    ta.remove();
+    openViberChat();
+  }
+
+  function openViberChat() {
+    /* Show toast telling user to paste */
+    var t = document.getElementById('toast');
+    t.textContent = PARTY.text.toastViberPaste;
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); t.textContent=PARTY.text.toastCopied; }, 3000);
+    /* Open Viber chat after short delay so user sees toast */
+    setTimeout(function(){
+      var a = document.createElement('a');
+      a.href = 'viber://chat?number=%2B' + RSVP_PHONE;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ a.remove(); }, 300);
+    }, 600);
+  }
+};
+
+/* ── Add to Calendar (ICS) ── */
+window.addToCalendar = function() {
+  var P = PARTY, c1 = P.child1, c2 = P.child2, v = P.venue, cal = P.calendar;
+  var summary = 'Πάρτυ ' + c1.nameGen + ' & ' + c2.nameGen + ' \u{1F389}';
+  var desc = '\u{1F382} Διπλό πάρτυ γενεθλίων!\\n' +
+    c1.emoji + ' ' + c1.name + ' - ' + c1.age + ' ετών\\n' +
+    c2.emoji + ' ' + c2.name + ' - ' + c2.age + ' ετών\\n' +
+    '\u{1F3F0} Χώρος: \u00AB' + v.nameClean + '\u00BB\\n' +
+    '\u{1F4CD} ' + v.address + '\\n' +
+    '\u{1F30D} ' + v.website;
+  var loc = '\u00AB' + v.nameClean + '\u00BB\\, ' + v.address.replace(/,/g, '\\,');
+
+  var lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//BdayInvite//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    'DTSTART:' + cal.dtStart,
+    'DTEND:' + cal.dtEnd,
+    'SUMMARY:' + summary,
+    'DESCRIPTION:' + desc,
+    'LOCATION:' + loc,
+    'GEO:' + v.geo,
+    'URL:' + v.mapsUrl,
+    'STATUS:CONFIRMED',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT1H',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Reminder',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ];
+  var icsContent = lines.join('\r\n');
+  var blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = cal.filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ a.remove(); URL.revokeObjectURL(url); }, 500);
+};
+
+/* ── Confetti ── */
+var confColors=['#ff6b9d','#4fc3f7','#ffd700','#b388ff','#69f0ae','#ff7043','#e040fb'];
+function launchConfetti(){
+  for(var i=0;i<100;i++){
+    (function(idx){setTimeout(function(){
+      var p=document.createElement('div');p.className='confetti-p';
+      p.style.left=Math.random()*100+'%';
+      p.style.background=confColors[Math.floor(Math.random()*confColors.length)];
+      p.style.width=(Math.random()*10+5)+'px';p.style.height=(Math.random()*10+5)+'px';
+      p.style.borderRadius=Math.random()>.5?'50%':'2px';
+      p.style.animationDuration=(Math.random()*2+2)+'s';
+      confettiBox.appendChild(p);
+      setTimeout(function(){p.remove()},4500);
+    },idx*25)})(i);
+  }
+}
+
+/* ── Sky color ── */
+function updateSky(pct){
+  if(pct<.2)       skyEl.style.background='linear-gradient(180deg,#0b0b2a,#1a1a4e 40%,#2e1065 70%,#4a1a8a)';
+  else if(pct<.4)  skyEl.style.background='linear-gradient(180deg,#0d1b3e,#1a3a6e 40%,#4a3080 70%,#8a4aaa)';
+  else if(pct<.6)  skyEl.style.background='linear-gradient(180deg,#1a3a6e,#2980b9 40%,#6dd5fa 70%,#b8e6ff)';
+  else if(pct<.8)  skyEl.style.background='linear-gradient(180deg,#2c3e50,#e74c3c 40%,#f39c12 70%,#ffeaa7)';
+  else             skyEl.style.background='linear-gradient(180deg,#1a0533,#4a1a6e 40%,#8e44ad 70%,#e056a0)';
+}
+
+/* ── TARDIS easter egg ── */
+function launchTardis(){
+  var wrap = document.createElement('div');
+  wrap.className = 'tardis-wrap';
+  wrap.innerHTML =
+    '<div class="tardis">' +
+      '<div class="tardis-lamp"></div>' +
+      '<div class="tardis-cap"></div>' +
+      '<div class="tardis-body">' +
+        '<div class="tardis-win"></div><div class="tardis-win"></div>' +
+        '<div class="tardis-sign"></div>' +
+        '<div class="tardis-doors">' +
+          '<div class="tardis-door"><div class="tardis-door-panel"></div><div class="tardis-door-panel"></div></div>' +
+          '<div class="tardis-door"><div class="tardis-door-panel"></div><div class="tardis-door-panel"></div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="tardis-base"></div>' +
+    '</div>';
+  document.body.appendChild(wrap);
+  setTimeout(function(){ wrap.remove(); }, 5500);
+}
+
+/* ── Copy invitation ── */
+window.copyInvitation=function(){
+  var P=PARTY, c1=P.child1, c2=P.child2, d=P.date, v=P.venue, r=P.rsvp;
+  var text=
+    '🎂 Διπλό Πάρτι Γενεθλίων!\n\n'+
+    c1.emoji+' '+c1.name+' γίνεται '+c1.age+'!\n'+
+    c2.emoji+' '+c2.name+' γίνεται '+c2.age+'!\n\n'+
+    '📅 '+d.full+'\n'+
+    '🕙 '+d.time+'\n\n'+
+    '📍 '+v.name+'\n'+
+    v.address+'\n'+
+    '🌐 '+v.websiteLabel+'\n\n'+
+    '🎭 Θέμα: '+P.theme+'\n\n'+
+    '📩 RSVP έως: '+r.deadline+'\n'+
+    '📞 '+r.phone+'\n'+
+    r.allergenNote+'\n\n'+
+    'Σας περιμένουμε! 🎉';
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showToast).catch(fb);
+  } else fb();
+  function fb(){
+    var ta=document.createElement('textarea');ta.value=text;
+    ta.style.cssText='position:fixed;left:-9999px';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');showToast()}catch(e){alert(text)}
+    ta.remove();
+  }
+};
+function showToast(){
+  var t=document.getElementById('toast');
+  t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500);
+}
+
+})();
+</script>
+</body>
+</html>
