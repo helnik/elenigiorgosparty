@@ -1051,6 +1051,29 @@ body.high-contrast .zone-panel{background:rgba(0,0,0,.95);border-color:#fff}
 .start-chars span:nth-child(2){animation-delay:.3s}
 @keyframes startBounce{0%{transform:translateY(0)}100%{transform:translateY(-15px)}}
 
+/* FLASHING POINTING HANDS */
+.start-btn-wrap{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.point-hand{
+  font-size:clamp(1.6rem,5vw,2.4rem);
+  animation:hintPulse 1.2s ease-in-out infinite, hintBounce .6s ease-in-out infinite alternate;
+  filter:grayscale(1) brightness(10) drop-shadow(0 0 8px rgba(255,255,255,.7));
+}
+.point-right{animation:hintPulse 1.2s ease-in-out infinite, hintBounceR .6s ease-in-out infinite alternate}
+@keyframes hintPulse{
+  0%,100%{opacity:.45}
+  50%{opacity:1}
+}
+@keyframes hintBounce{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(8px)}
+}
+@keyframes hintBounceR{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-8px)}
+}
+
 /* ============================================================
    INSTRUCTIONS PANEL (on start screen)
    ============================================================ */
@@ -1192,7 +1215,11 @@ body.high-contrast .zone-panel{background:rgba(0,0,0,.95);border-color:#fff}
     <div class="instr-row"><span class="instr-icon">✊</span><span>Κράτα πατημένο για να <b>τρέξεις!</b></span></div>
     <div class="instr-row"><span class="instr-icon">⌨️</span><span>Ή χρησιμοποίησε τα βέλη ← →</span></div>
   </div>
-  <button class="btn" id="startBtn" aria-label="Ξεκίνα την περιπέτεια"></button>
+  <div class="start-btn-wrap">
+    <span class="point-hand point-left" aria-hidden="true">👉</span>
+    <button class="btn" id="startBtn" aria-label="Ξεκίνα την περιπέτεια"></button>
+    <span class="point-hand point-right" aria-hidden="true">👈</span>
+  </div>
 </div>
 
 <!-- ═══════ MOVEMENT CONTROLS ═══════ -->
