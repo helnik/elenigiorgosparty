@@ -48,7 +48,3 @@ The `PARTY` object exposes every user-facing string and setting:
 - **Viber** RSVP with pre-filled message
 - Fully responsive — works on mobile and desktop
 - No external dependencies
-
-## License
-
-Private project — not intended for redistribution.
